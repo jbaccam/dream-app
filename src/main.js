@@ -31,11 +31,11 @@ form.addEventListener('submit', async (e) => {
 function showSpinner() {
     const button = document.querySelector('button');
     button.disabled = true;
-    button.innerHTML = 'Generating... <span class="spinner"></span>';
+    button.innerHTML = 'Generating... <span class="spinner">⚙️</span>';
   }
   
   function hideSpinner() {
     const button = document.querySelector('button');
     button.disabled = false;
-    button.innerHTML = 'Dream';
+    button.innerHTML = 'Generate';
   }
