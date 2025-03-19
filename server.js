@@ -1,42 +1,54 @@
 // server.js (ES Module)
-import dotenv from 'dotenv';
-dotenv.config(); // load environment variables from .env
 
+// 1) load environment variables from .env
+import dotenv from 'dotenv';
+dotenv.config(); // this reads .env and merges variables into process.env
+
+// 2) import openai, express, and cors
 import OpenAI from 'openai';
 import express from 'express';
 import cors from 'cors';
 
-// 1) initialize openai with my api key
+// 3) initialize openai with my api key
+//    ensure .env has OPENAI=sk-... 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI, // ensure .env has OPENAI=sk-...
+  apiKey: process.env.OPENAI,
 });
 
-// 2) create express app
+// 4) create an express application
 const app = express();
-app.use(cors());
-app.use(express.json());
+app.use(cors());        // allow cross origin requests
+app.use(express.json()); // parse JSON bodies from incoming requests
 
-// 3) setup /dream endpoint
+// 5) set up /dream endpoint
 app.post('/dream', async (req, res) => {
   try {
+    // extract the prompt from the request body
     const prompt = req.body.prompt;
+
     // call the openai images.create() method
-    const aiResponse = await openai.images.create({
+    const aiResponse = await openai.images.generate({
+      model: "dall-e-3",
       prompt,
-      n: 1,
-      size: '1024x1024',
+      n: 1,            // number of images to generate
+      size: '1024x1024' // resolution of the generated image
     });
 
-    // get the image URL
+    // extract the image URL from the response
     const image = aiResponse.data[0].url;
+
+    // send the image URL back to the client
     res.send({ image });
   } catch (error) {
-    console.error('Error generating image:', error);
+    // for debugging the actual openai error details 
+    console.error('Error generating image:', error.response?.data || error.message);
+
+    // send a 500 status with a generic error message
     res.status(500).send({ error: 'Failed to generate image' });
   }
 });
 
-// 4) start the server
+// 6) start the server on port 8080
 app.listen(8080, () => {
   console.log('Server running on http://localhost:8080/dream');
 });
